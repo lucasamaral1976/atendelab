@@ -1,0 +1,23 @@
+# Dependências
+/vendor/
+
+# Arquivos de ambiente
+.env
+.env.local
+
+# Logs
+*.log
+
+# Configurações do VS Code
+.vscode/
+
+# Configurações do sistema
+.DS_Store
+Thumbs.db
+
+# Cache
+.cache/
+
+# Arquivos temporários
+*.tmp
+*.temp
