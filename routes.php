@@ -1,50 +1,43 @@
 <?php
 
-require_once 'config/database.php';
+require_once __DIR__ . '/app/Middleware/auth.php';
+require_once __DIR__ . '/config/database.php';
 
-require_once 'app/Controllers/UsuariosController.php';
-require_once 'app/Controllers/ClientesController.php';
+$controller = $_GET['controller'] ?? 'auth';
+$action     = $_GET['action']     ?? 'login';
 
-$acao = $_GET['acao'] ?? '';
+if ($controller === 'auth') {
 
-switch ($acao) {
+    require_once __DIR__ . '/app/Controllers/AuthController.php';
+    $ctrl = new AuthController($pdo);
 
-    // USUÁRIOS
+    match ($action) {
+        'login'     => $ctrl->exibirLogin(),
+        'entrar'    => $ctrl->entrar(),
+        'dashboard' => $ctrl->dashboard(),
+        'logout'    => $ctrl->logout(),
+        default     => $ctrl->exibirLogin(),
+    };
 
-    case 'listar':
-        $controller = new UsuariosController($pdo);
-        $controller->listar();
-        break;
+} elseif ($controller === 'usuarios') {
 
-    case 'cadastrar':
-        $controller = new UsuariosController($pdo);
-        $controller->cadastrar();
-        break;
+    // Protege todo o CRUD de usuários — exige sessão ativa
+    exigirAutenticacao();
 
-    case 'atualizar':
-        $controller = new UsuariosController($pdo);
-        $controller->atualizar();
-        break;
+    require_once __DIR__ . '/app/Controllers/UsuariosController.php';
+    $ctrl = new UsuariosController($pdo);
 
-    case 'excluir':
-        $controller = new UsuariosController($pdo);
-        $controller->excluir();
-        break;
+    match ($action) {
+        'index'   => $ctrl->index(),
+        'criar'   => $ctrl->criar(),
+        'salvar'  => $ctrl->salvar(),
+        'editar'  => $ctrl->editar(),
+        'atualizar' => $ctrl->atualizar(),
+        'excluir' => $ctrl->excluir(),
+        default   => $ctrl->index(),
+    };
 
-    // CLIENTES
-
-    case 'listar_clientes':
-        $controller = new ClientesController($pdo);
-        $controller->listar();
-        break;
-
-    case 'cadastrar_cliente':
-        $controller = new ClientesController($pdo);
-        $controller->cadastrar();
-        break;
-
-    default:
-        echo json_encode([
-            "mensagem" => "Rota não encontrada"
-        ]);
+} else {
+    http_response_code(404);
+    echo '<h1>404 — Rota não encontrada</h1>';
 }
