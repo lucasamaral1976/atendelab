@@ -1,66 +1,46 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__ . '/../layouts/config-view.php';
+$mensagem = $_SESSION['mensagem'] ?? '';
+$erroLogin = $_SESSION['erro_login'] ?? '';
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AtendeLab — Login</title>
-    <link
-        rel="stylesheet"
-        href="[cdn.jsdelivr.net](https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css)"
-    >
+    <title>Entrar | AtendeLab</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/style.css">
 </head>
 <body class="bg-light">
-
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-    <div class="card shadow" style="width: 100%; max-width: 400px;">
-        <div class="card-body p-4">
-
-            <h4 class="card-title text-center mb-4">AtendeLab</h4>
-
-            <?php if (!empty($mensagem)): ?>
-                <div class="alert alert-<?= htmlspecialchars($tipoMensagem, ENT_QUOTES, 'UTF-8') ?> alert-dismissible fade show" role="alert">
-                    <?= htmlspecialchars($mensagem, ENT_QUOTES, 'UTF-8') ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <div class="container min-vh-100 d-flex align-items-center justify-content-center py-4">
+        <div class="card border-0 shadow-sm login-card">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="brand-mark mx-auto mb-3">AL</div>
+                    <h1 class="h3 mb-1">AtendeLab</h1>
+                    <p class="text-secondary mb-0">Controle de atendimentos acadêmicos</p>
                 </div>
-            <?php endif; ?>
-
-            <form method="POST" action="<?= BASE_URL ?>?controller=auth&action=entrar" novalidate>
-
-                <div class="mb-3">
-                    <label for="email" class="form-label">E-mail</label>
-                    <input
-                        type="email"
-                        class="form-control"
-                        id="email"
-                        name="email"
-                        required
-                        autofocus
-                        placeholder="admin@atendelab.com"
-                    >
-                </div>
-
-                <div class="mb-4">
-                    <label for="senha" class="form-label">Senha</label>
-                    <input
-                        type="password"
-                        class="form-control"
-                        id="senha"
-                        name="senha"
-                        required
-                        placeholder="••••••"
-                    >
-                </div>
-
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-primary">Entrar</button>
-                </div>
-
-            </form>
-
+                <?php if (!empty($mensagem)): ?>
+                    <div class="alert alert-success"><?= htmlspecialchars((string) $mensagem, ENT_QUOTES, 'UTF-8') ?></div>
+                <?php endif; ?>
+                <?php if (!empty($erroLogin)): ?>
+                    <div class="alert alert-danger"><?= htmlspecialchars((string) $erroLogin, ENT_QUOTES, 'UTF-8') ?></div>
+                <?php endif; ?>
+                <form method="post" action="<?= $baseUrl ?>?controller=auth&action=entrar">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">E-mail</label>
+                        <input type="email" class="form-control" id="email" name="email" required autofocus>
+                    </div>
+                    <div class="mb-4">
+                        <label for="senha" class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="senha" name="senha" required>
+                    </div>
+                    <button class="btn btn-success w-100" type="submit">Entrar</button>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-
-<script src="[cdn.jsdelivr.net](https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js)"></script>
 </body>
 </html>

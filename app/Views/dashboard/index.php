@@ -1,49 +1,58 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AtendeLab — Dashboard</title>
-    <link
-        rel="stylesheet"
-        href="[cdn.jsdelivr.net](https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css)"
-    >
-</head>
-<body>
+<?php
+$tituloPagina = 'Dashboard';
+require __DIR__ . '/../layouts/header.php';
+?>
 
-<nav class="navbar navbar-dark bg-primary mb-4">
-    <div class="container">
-        <span class="navbar-brand">AtendeLab</span>
-        <a href="<?= BASE_URL ?>?controller=auth&action=logout" class="btn btn-outline-light btn-sm">
-            Sair
-        </a>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Dashboard</h1>
+        <p class="text-secondary mb-0">Resumo simples para validar a integração com o backend.</p>
     </div>
-</nav>
-
-<div class="container">
-
-    <div class="alert alert-success">
-        Bem-vindo, <strong><?= htmlspecialchars($usuario['nome'], ENT_QUOTES, 'UTF-8') ?></strong>!
-        Perfil: <strong><?= htmlspecialchars($usuario['perfil'], ENT_QUOTES, 'UTF-8') ?></strong>
-    </div>
-
-    <div class="card mb-3">
-        <div class="card-body">
-            <h5 class="card-title">Área restrita</h5>
-            <p class="card-text text-muted">
-                Você está autenticado. Esta página só é acessível com sessão válida.
-            </p>
-            <a
-                href="<?= BASE_URL ?>?controller=usuarios&action=index"
-                class="btn btn-secondary btn-sm"
-            >
-                Testar rota protegida de usuários
-            </a>
-        </div>
-    </div>
-
 </div>
 
-<script src="[cdn.jsdelivr.net](https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js)"></script>
-</body>
-</html>
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-secondary small">Pessoas cadastradas</div>
+                <div class="display-6 fw-semibold" id="totalPessoas">...</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-secondary small">Tipos de atendimento</div>
+                <div class="display-6 fw-semibold" id="totalTipos">...</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-secondary small">Atendimentos registrados</div>
+                <div class="display-6 fw-semibold" id="totalAtendimentos">...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const targets = {
+        pessoas: document.getElementById('totalPessoas'),
+        tipos: document.getElementById('totalTipos'),
+        atendimentos: document.getElementById('totalAtendimentos')
+    };
+    for (const [controller, element] of Object.entries(targets)) {
+        try {
+            const response = await AtendeLabApi.get(controller, 'listar');
+            element.textContent = AtendeLabApi.toList(response).length;
+        } catch (error) {
+            element.textContent = '!';
+        }
+    }
+});
+</script>
+
+<?php require __DIR__ . '/../layouts/footer.php'; ?>
