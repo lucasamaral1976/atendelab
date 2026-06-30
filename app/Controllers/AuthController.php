@@ -13,21 +13,25 @@ class AuthController
 
     public function exibirLogin(): void
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         if (usuarioAutenticado()) {
             header('Location: ' . BASE_URL . '?controller=auth&action=dashboard');
             exit;
         }
 
-        $mensagem     = $_SESSION['mensagem']     ?? null;
-        $tipoMensagem = $_SESSION['tipo_mensagem'] ?? 'danger';
-
-        unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']);
-
+        // Apenas carrega a view. Deixamos a própria view ler e limpar as mensagens.
         require_once __DIR__ . '/../Views/auth/login.php';
     }
 
     public function entrar(): void
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . '?controller=auth&action=login');
             exit;
@@ -35,11 +39,11 @@ class AuthController
 
         $email = trim($_POST['email'] ?? '');
         $senha = $_POST['senha'] ?? '';
+        $erroGenerico = 'E-mail ou senha inválidos.';
 
         // Validação básica do formato de e-mail
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) || empty($senha)) {
-            $_SESSION['mensagem']     = 'E-mail ou senha inválidos.';
-            $_SESSION['tipo_mensagem'] = 'danger';
+            $_SESSION['erro_login'] = $erroGenerico; // Alinhado com o login.php
             header('Location: ' . BASE_URL . '?controller=auth&action=login');
             exit;
         }
@@ -53,28 +57,22 @@ class AuthController
 
         $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Mensagem genérica para não expor quais e-mails existem
-        $erroGenerico = 'E-mail ou senha inválidos.';
-
         if (!$usuario) {
-            $_SESSION['mensagem']     = $erroGenerico;
-            $_SESSION['tipo_mensagem'] = 'danger';
+            $_SESSION['erro_login'] = $erroGenerico; // Alinhado com o login.php
             header('Location: ' . BASE_URL . '?controller=auth&action=login');
             exit;
         }
 
         // Bloqueia usuários inativos (RN09)
         if ($usuario['status'] !== 'ativo') {
-            $_SESSION['mensagem']     = $erroGenerico;
-            $_SESSION['tipo_mensagem'] = 'danger';
+            $_SESSION['erro_login'] = 'Sua conta está inativa. Contate o administrador.';
             header('Location: ' . BASE_URL . '?controller=auth&action=login');
             exit;
         }
 
         // Verifica a senha contra o hash armazenado (RNF05)
         if (!password_verify($senha, $usuario['senha'])) {
-            $_SESSION['mensagem']     = $erroGenerico;
-            $_SESSION['tipo_mensagem'] = 'danger';
+            $_SESSION['erro_login'] = $erroGenerico; // Alinhado com o login.php
             header('Location: ' . BASE_URL . '?controller=auth&action=login');
             exit;
         }
@@ -87,7 +85,7 @@ class AuthController
             'id'    => $usuario['id'],
             'nome'  => $usuario['nome'],
             'email' => $usuario['email'],
-            'perfil' => $usuario['perfil'],
+            'perfil'=> $usuario['perfil'],
         ];
 
         header('Location: ' . BASE_URL . '?controller=auth&action=dashboard');
@@ -97,18 +95,18 @@ class AuthController
     public function dashboard(): void
     {
         exigirAutenticacao();
-
         $usuario = usuarioAtual();
-
         require_once __DIR__ . '/../Views/dashboard/index.php';
     }
 
     public function logout(): void
     {
-        // Limpa todos os dados da sessão
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         $_SESSION = [];
 
-        // Remove o cookie de sessão do navegador
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
             setcookie(
@@ -124,10 +122,8 @@ class AuthController
 
         session_destroy();
 
-        // Reinicia a sessão para poder enviar a mensagem de feedback
         session_start();
-        $_SESSION['mensagem']     = 'Sessão encerrada com sucesso.';
-        $_SESSION['tipo_mensagem'] = 'success';
+        $_SESSION['mensagem'] = 'Sessão encerrada com sucesso.';
 
         header('Location: ' . BASE_URL . '?controller=auth&action=login');
         exit;

@@ -1,8 +1,20 @@
 <?php
 declare(strict_types=1);
+
+// 1. Garante que a sessão está ativa para conseguir ler os erros
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 2. Carrega as configurações de visualização originais do seu projeto
 require_once __DIR__ . '/../layouts/config-view.php';
+
+// 3. Resgata as mensagens guardadas na sessão
 $mensagem = $_SESSION['mensagem'] ?? '';
 $erroLogin = $_SESSION['erro_login'] ?? '';
+
+// 4. Limpa a sessão LOGO APÓS salvar nas variáveis, para não repetir o erro ao dar F5
+unset($_SESSION['mensagem'], $_SESSION['erro_login']);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -22,12 +34,15 @@ $erroLogin = $_SESSION['erro_login'] ?? '';
                     <h1 class="h3 mb-1">AtendeLab</h1>
                     <p class="text-secondary mb-0">Controle de atendimentos acadêmicos</p>
                 </div>
+                
                 <?php if (!empty($mensagem)): ?>
                     <div class="alert alert-success"><?= htmlspecialchars((string) $mensagem, ENT_QUOTES, 'UTF-8') ?></div>
                 <?php endif; ?>
+                
                 <?php if (!empty($erroLogin)): ?>
                     <div class="alert alert-danger"><?= htmlspecialchars((string) $erroLogin, ENT_QUOTES, 'UTF-8') ?></div>
                 <?php endif; ?>
+                
                 <form method="post" action="<?= $baseUrl ?>?controller=auth&action=entrar">
                     <div class="mb-3">
                         <label for="email" class="form-label">E-mail</label>
