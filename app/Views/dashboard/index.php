@@ -37,6 +37,18 @@ require __DIR__ . '/../layouts/header.php';
     </div>
 </div>
 
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <h2 class="h5">Acesso rápido</h2>
+        <p class="text-secondary">Use os módulos abaixo para cadastrar e consultar dados reais do banco.</p>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-success" href="<?= $baseUrl ?>?controller=frontend&action=pessoas">Gerenciar pessoas</a>
+            <a class="btn btn-outline-success" href="<?= $baseUrl ?>?controller=frontend&action=tipos">Gerenciar tipos</a>
+            <a class="btn btn-outline-success" href="<?= $baseUrl ?>?controller=frontend&action=atendimentos">Registrar atendimentos</a>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
     const targets = {
@@ -44,12 +56,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         tipos: document.getElementById('totalTipos'),
         atendimentos: document.getElementById('totalAtendimentos')
     };
+
     for (const [controller, element] of Object.entries(targets)) {
         try {
             const response = await AtendeLabApi.get(controller, 'listar');
             element.textContent = AtendeLabApi.toList(response).length;
         } catch (error) {
             element.textContent = '!';
+            element.title = error.message;
         }
     }
 });
